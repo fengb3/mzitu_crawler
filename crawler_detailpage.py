@@ -76,9 +76,16 @@ def get_imgcontent(img_url):
 def dowload_image(url, info, title):
     print("Dowloading " + title)
     for page_num in bar(range(1, info['max_page']+1)):
-        f = open(path + '/' + title + '/img' + str(page_num), 'wb')
         img_url = get_imgurl(url + '/' + str(page_num))
-        f.write(get_imgcontent(img_url))
+
+        try:
+            img_content = get_imgcontent(img_url)
+        except ConnectionResetError:
+            print('Error when geting image', img_url)
+            continue
+
+        f = open(path + '/' + title + '/img' + str(page_num), 'wb')
+        f.write(img_content)
         f.close()
         time.sleep(random.randint(0,3))
 
@@ -95,7 +102,7 @@ with open('urls.csv') as csv_file:
                 progressbar.ETA()
             ]
         )
-        if count < 11 and count > 5:
+        if count < 15 and count > 9:
             if(os.path.exists(path + row[0].replace('?', ''))):
                 print('catalog exist', count)
             else:
@@ -109,14 +116,5 @@ with open('urls.csv') as csv_file:
             dowload_image(row[1], info, row[0])
         count += 1
 
-'''
-page_dict = read_info('https://www.mzitu.com/252276')
-for page_num in range(1, page_dict['max_page']):  
-    f = open('img' + str(page_num), 'wb')
-    img_url = get_imgurl('https://www.mzitu.com/252276/' + str(page_num))
-    f.write(get_imgcontent(img_url))
-    f.close()
-    time.sleep(random.randint(0,3))
-'''
 
 
